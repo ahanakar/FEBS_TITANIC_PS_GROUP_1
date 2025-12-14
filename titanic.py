@@ -19,4 +19,7 @@ def feature_engineering(train):
     train['TotalSpend'] = train[spend_cols].sum(axis=1)
     return train
 train_fe = feature_engineering(train)
+test_fe = feature_engineering(test)
 print(train_fe)
+print(test_fe)
+
