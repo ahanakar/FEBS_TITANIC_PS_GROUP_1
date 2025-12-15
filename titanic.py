@@ -143,54 +143,18 @@ Deck A and D show relatively balanced counts, while Deck T has very few passenge
 Cabin Deck is an important categorical feature, as transportation chances varies noticeably across different decks
 '''
 
-# FROM AHANA'S BRANCH
+plt.figure(figsize=(8,5))
+sns.countplot(x='VIP',hue='Transported',data=train, palette='Set2')
+plt.ylabel('No. of people transported')
+plt.title('VIP/Non VIP vs Transpoted')
+# plt.show()
+# INTERPRETAION
+'''
+Most passengers are Non-VIP, and their transported vs not-transported counts are almost same.
 
-def preprocess_basic(train): 
-    train = train.copy()
+VIP passengers are very few compared to Non-VIPs.
 
-    #categorizing columns 
-    train = train.drop(columns = ['Name'], errors = 'ignore')
-    cat_cols = ['HomePlanet', 'CryoSleep', 'Destination', 'VIP']
-    num_gaussian = ['Age']
-    num_spent = ['RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
-    train[['Deck', 'CabinNumber', 'Side']] = train['Cabin'].str.split('/', expand=True)
-    
-    for col in ['Deck', 'Side']:
-        if col in train.columns:
-            cat_cols.append(col)
-            
-    #filling in null values
-    from sklearn.impute import SimpleImputer
-    train[num_gaussian] = SimpleImputer(strategy = 'median').fit_transform(train[num_gaussian])
-    #simple imputer used for age as it has normal distribution
-            
-    from sklearn.impute import KNNImputer
-    train[num_spent] = KNNImputer(n_neighbors = 4, weights = 'distance').fit_transform(train[num_spent])
-    #add_indicator not used because extra columns will be added and it will be more complex 
+Among VIPs, more passengers were not transported than transported, showing no strong positive impact of VIP status.
 
-    train[cat_cols] = SimpleImputer(strategy = 'most_frequent').fit_transform(train[cat_cols])
-    for col in ['CryoSleep', 'VIP']:
-        if col in train.columns:
-            train[col] = train[col].astype(bool)
-
-    #encoding categorical data
-    from sklearn.preprocessing import OneHotEncoder
-    drop_list = ['Earth', False, '55 Cancri e', False]
-    if 'Deck' in cat_cols:
-        drop_list.append(None)
-    if 'Side' in cat_cols:
-        drop_list.append(None)
-    ohe = OneHotEncoder(handle_unknown = 'ignore', drop = drop_list, sparse_output = False)
-    cat_cols_encoded = ohe.fit_transform(train[cat_cols])
-    cat_cols_encoded = pd.DataFrame(cat_cols_encoded, columns = ohe.get_feature_names_out(cat_cols), index = train.index)
-    train = train.drop(columns = cat_cols)
-    train = pd.concat([train, cat_cols_encoded], axis = 1)
-            
-    #scaling numerical data
-    from sklearn.preprocessing import StandardScaler
-    train[num_gaussian] = StandardScaler().fit_transform(train[num_gaussian])
-            
-    from sklearn.preprocessing import MinMaxScaler
-    train[num_spent] = MinMaxScaler().fit_transform(train[num_spent])
-    return(train)
-
+VIP shows weak influence on the target due to very small VIP sample size
+'''
